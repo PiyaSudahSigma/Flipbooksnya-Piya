@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Piya Flipbook — baca koleksi PDF dalam bentuk buku digital dengan efek membalik halaman 3D.">
+  <meta name="color-scheme" content="light">
+  <title>Piya Flipbook</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232f4f43'/%3E%3Cpath d='M8 8h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H8zM24 8h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z' fill='%23f7f3ec'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/vendor/page-flip/st-page-flip.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>
+    /* Base path aset: selalu relatif terhadap halaman ini (aman untuk subpath GitHub Pages) */
+    window.PIYA_ASSET_BASE = './';
+  </script>
+</head>
+<body>
+  <noscript>
+    <div class="noscript-msg">Website ini membutuhkan JavaScript untuk membaca dan mendekripsi buku.</div>
+  </noscript>
+
+  <!-- ==================== HALAMAN LOGIN ==================== -->
+  <section id="view-login" class="view view-login">
+    <div class="login-shell">
+      <div class="login-brand">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="12" fill="#2f4f43"></rect>
+          <path d="M16 16h14a6 6 0 0 1 6 6v26a6 6 0 0 0-6-6H16z" fill="#f7f3ec"></path>
+          <path d="M48 16H34a6 6 0 0 0-6 6v26a6 6 0 0 1 6-6h14z" fill="#e9e2d5"></path>
+        </svg>
+        <h1 class="brand-name">Piya Flipbook</h1>
+        <p class="brand-tagline">Koleksi bacaan digital dengan efek membalik halaman 3D</p>
+      </div>
+
+      <form id="login-form" class="login-form" autocomplete="off">
+        <label class="field-label" for="login-password">Password</label>
+        <div class="password-row">
+          <input id="login-password" class="input" type="password"
+                 name="password" required autocomplete="current-password"
+                 placeholder="Masukkan password" autofocus>
+          <button id="login-toggle-pw" class="btn btn-ghost" type="button" aria-pressed="false">Tampilkan</button>
+        </div>
+        <p id="login-error" class="form-error" role="alert" hidden></p>
+        <button id="login-submit" class="btn btn-primary btn-block" type="submit">Masuk</button>
+      </form>
+
+      <div class="login-note">
+        <p><strong>Instalasi awal:</strong> password bawaan adalah <code>piya 123</code>.</p>
+        <p class="note-warn">Segera ganti dengan password yang kuat sebelum mengunggah dokumen pribadi atau rahasia. Lihat <code>README.md</code> dan <code>tools/change-password.html</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== HALAMAN KOLEKSI ==================== -->
+  <section id="view-library" class="view view-library" hidden>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand-link" href="#/library">
+          <svg class="brand-mark-sm" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="12" fill="#2f4f43"></rect>
+            <path d="M16 16h14a6 6 0 0 1 6 6v26a6 6 0 0 0-6-6H16z" fill="#f7f3ec"></path>
+            <path d="M48 16H34a6 6 0 0 0-6 6v26a6 6 0 0 1 6-6h14z" fill="#e9e2d5"></path>
+          </svg>
+          <span>Piya Flipbook</span>
+        </a>
+        <div class="header-actions">
+          <a class="btn btn-ghost" href="tools/manage-library.html" title="Kelola koleksi (lokal)">Kelola</a>
+          <a class="btn btn-ghost" href="tools/change-password.html" title="Ganti password (lokal)">Ganti Password</a>
+          <button id="logout-btn" class="btn btn-ghost" type="button">Keluar</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="library-main">
+      <div class="library-toolbar">
+        <h2 class="section-title">Koleksi Buku</h2>
+        <div class="search-row">
+          <input id="library-search" class="input input-search" type="search"
+                 placeholder="Cari judul buku…" aria-label="Cari buku">
+          <span id="library-status" class="search-status" aria-live="polite"></span>
+        </div>
+      </div>
+      <div id="library-grid" class="book-grid"></div>
+    </main>
+
+    <footer class="site-footer">
+      <p>Piya Flipbook &copy; <span id="footer-year"></span> — Dokumen dilindungi enkripsi AES-256-GCM di sisi browser.</p>
+    </footer>
+  </section>
+
+  <!-- ==================== HALAMAN READER ==================== -->
+  <section id="view-reader" class="view view-reader" hidden>
+    <header class="reader-top">
+      <button id="reader-back" class="btn btn-ghost" type="button" title="Kembali ke koleksi">&larr; Koleksi</button>
+      <h2 id="reader-title" class="reader-title" title=""></h2>
+      <div class="reader-top-actions">
+        <button id="reader-mode-toggle" class="btn btn-ghost" type="button" title="Baca dengan mode gulir (lebih ringan)">Mode gulir</button>
+        <button id="reader-fullscreen" class="btn btn-ghost" type="button" title="Layar penuh">Fullscreen</button>
+      </div>
+    </header>
+
+    <div id="reader-stage-wrap" class="reader-stage-wrap">
+      <div id="reader-stage" class="reader-stage"></div>
+      <div id="reader-scroll" class="reader-scroll" hidden></div>
+      <div id="reader-loading" class="reader-loading" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="reader-loading-text">Memuat…</p>
+      </div>
+    </div>
+
+    <footer class="reader-toolbar">
+      <button id="reader-prev" class="btn btn-dark" type="button" title="Halaman sebelumnya">&lsaquo; Sebelumnya</button>
+      <div class="page-indicator">
+        <label for="reader-page-input" class="page-label">Halaman</label>
+        <input id="reader-page-input" class="input input-page" type="number" min="1" value="1" inputmode="numeric">
+        <span class="page-sep">/</span>
+        <span id="reader-page-total">0</span>
+      </div>
+      <button id="reader-next" class="btn btn-dark" type="button" title="Halaman berikutnya">Berikutnya &rsaquo;</button>
+      <div class="zoom-controls">
+        <button id="reader-zoom-out" class="btn btn-ghost" type="button" title="Perkecil">&minus;</button>
+        <span id="reader-zoom-level" class="zoom-level">100%</span>
+        <button id="reader-zoom-in" class="btn btn-ghost" type="button" title="Perbesar">+</button>
+      </div>
+    </footer>
+  </section>
+
+  <script src="assets/vendor/page-flip/page-flip.browser.js"></script>
+  <script src="assets/vendor/pdfjs/pdf.min.js"></script>
+  <script src="assets/js/crypto.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/library.js"></script>
+  <script src="assets/js/flipbook.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
