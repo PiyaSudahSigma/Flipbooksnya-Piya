@@ -1,5 +1,16 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-10T00:00:00.000Z",
-  "books": []
+  "updatedAt": "2026-10-10T09:24:57.046Z",
+  "books": [
+    {
+      "id": "piya",
+      "title": "Piya",
+      "description": "yayaya",
+      "pages": 10,
+      "cover": "books/covers/piya.jpeg",
+      "file": "books/piya.piyapdf",
+      "format": "piyapdf/1",
+      "addedAt": "2026-10-10T09:24:57.046Z"
+    }
+  ]
 }
