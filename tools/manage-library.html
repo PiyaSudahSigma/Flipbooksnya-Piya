@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Kelola Koleksi — Piya Flipbook</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>
+    window.PIYA_ASSET_BASE = '../';
+  </script>
+</head>
+<body>
+  <div class="view-tools">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand-link" href="../index.html">
+          <svg class="brand-mark-sm" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="12" fill="#2f4f43"></rect>
+            <path d="M16 16h14a6 6 0 0 1 6 6v26a6 6 0 0 0-6-6H16z" fill="#f7f3ec"></path>
+            <path d="M48 16H34a6 6 0 0 0-6 6v26a6 6 0 0 1 6-6h14z" fill="#e9e2d5"></path>
+          </svg>
+          <span>Piya Flipbook</span>
+        </a>
+        <div class="header-actions">
+          <a class="btn btn-ghost" href="change-password.html">Ganti Password</a>
+          <a class="btn btn-ghost" href="../index.html">&larr; Kembali</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="tools-main">
+      <h1 class="tools-title">Kelola Koleksi Buku</h1>
+      <p class="tools-sub">Utilitas ini berjalan <strong>sepenuhnya di browser Anda</strong>. File PDF tidak dikirim ke mana pun; enkripsi terjadi di komputer ini. Hasilnya lalu Anda unggah ke repository GitHub.</p>
+
+      <div class="warn-box">
+        <strong>Penting:</strong> jangan pernah mengunggah PDF asli (belum terenkripsi) ke repository publik. Selalu unggah hanya berkas <code>.piyapdf</code> hasil enkripsi dari halaman ini. Simpan PDF asli sebagai cadangan di luar repository.
+      </div>
+
+      <!-- 1. Katalog -->
+      <section class="panel">
+        <h2>1. Katalog</h2>
+        <p class="mini-note">Muat <code>data/catalog.json</code> yang sudah ada agar daftar buku bisa diperbarui. Jika ini buku pertama, biarkan kosong.</p>
+        <div class="file-row">
+          <input id="catalog-file" type="file" accept=".json,application/json">
+          <button id="catalog-new" class="btn btn-ghost" type="button">Katalog Baru (kosong)</button>
+          <button id="catalog-download" class="btn btn-primary" type="button" disabled>Unduh catalog.json</button>
+        </div>
+        <p id="catalog-status" class="mini-note">Katalog belum dimuat.</p>
+        <div id="book-list"></div>
+      </section>
+
+      <!-- 2. Tambah buku -->
+      <section class="panel">
+        <h2>2. Tambah Buku (Enkripsi PDF)</h2>
+
+        <label class="field-label" for="book-pdf">File PDF asli</label>
+        <div class="file-row">
+          <input id="book-pdf" type="file" accept=".pdf,application/pdf">
+        </div>
+
+        <label class="field-label" for="book-title">Judul buku</label>
+        <input id="book-title" class="input" type="text" maxlength="160" placeholder="Contoh: Kumpulan Cerita Piya">
+
+        <label class="field-label" for="book-desc">Deskripsi singkat (opsional)</label>
+        <input id="book-desc" class="input" type="text" maxlength="300" placeholder="Deskripsi singkat buku">
+
+        <label class="field-label" for="book-id">ID / nama file (otomatis dari judul, bisa diubah)</label>
+        <input id="book-id" class="input" type="text" maxlength="80" placeholder="kumpulan-cerita-piya">
+
+        <label class="field-label" for="book-password">Password enkripsi (satu password untuk seluruh koleksi)</label>
+        <div class="password-row">
+          <input id="book-password" class="input" type="password" autocomplete="new-password" placeholder="Password perpustakaan Anda">
+          <button id="toggle-pw" class="btn btn-ghost" type="button">Tampilkan</button>
+        </div>
+        <p class="mini-note">Gunakan password yang sama dengan password login website agar buku bisa dibuka setelah login. Password awal adalah <code>piya 123</code> — gantilah sebelum dokumen privat (lihat halaman <a href="change-password.html">Ganti Password</a>).</p>
+
+        <label class="field-label" for="book-cover">Cover khusus (opsional, JPG/PNG). Jika kosong, cover dibuat dari halaman pertama PDF.</label>
+        <div class="file-row">
+          <input id="book-cover" type="file" accept="image/*">
+        </div>
+
+        <div class="file-row">
+          <button id="book-process" class="btn btn-primary" type="button">Enkripsi &amp; Siapkan Unduhan</button>
+        </div>
+        <div id="book-progress" class="mini-note" hidden></div>
+        <div id="book-results"></div>
+      </section>
+
+      <!-- 3. Cara menambahkan ke GitHub -->
+      <section class="panel">
+        <h2>3. Struktur Folder &amp; Cara Menerbitkan</h2>
+        <ol class="step-list">
+          <li>Setelah menekan <strong>Enkripsi &amp; Siapkan Unduhan</strong>, browser mengunduh berkas-berkas hasil. Letakkan di repository dengan struktur berikut:</li>
+        </ol>
+<pre class="mini-note">Flipbooksnya-Piya/
+├── books/
+│   ├── <strong>ID-BUKU</strong>.piyapdf        &lt;- hasil unduhan (file terenkripsi)
+│   └── covers/
+│       └── <strong>ID-BUKU</strong>.jpg          &lt;- hasil unduhan (cover)
+├── data/
+│   ├── catalog.json            &lt;- hasil unduhan (ganti yang lama)
+│   └── auth.json
+└── ...</pre>
+        <ol class="step-list" start="2">
+          <li>Buka terminal di folder repository, lalu commit dan push:</li>
+        </ol>
+<pre class="mini-note">git add books data
+git commit -m "Tambah buku baru"
+git push</pre>
+        <ol class="step-list" start="3">
+          <li>Tunggu GitHub Pages selesai memperbarui (± 1 menit), lalu buka website. Buku baru akan tampil di koleksi.</li>
+          <li><strong>Menghapus buku:</strong> hapus entri di daftar bawah katalog (tombol Hapus), unduh <code>catalog.json</code> baru, hapus juga file di <code>books/</code>, lalu push.</li>
+          <li><strong>Mengganti buku:</strong> proses ulang PDF dengan ID yang sama, timpa file lama, lalu push.</li>
+        </ol>
+        <p class="mini-note">Perubahan di halaman ini <strong>tidak langsung tersimpan online</strong>. Website hanya berubah setelah Anda commit &amp; push ke GitHub.</p>
+      </section>
+
+      <!-- 4. Keamanan -->
+      <section class="panel">
+        <h2>Catatan Keamanan</h2>
+        <ul class="help-list">
+          <li>Enkripsi memakai <strong>AES-256-GCM</strong> dengan kunci diturunkan dari password lewat <strong>PBKDF2-SHA256</strong> (salt acak per file, IV unik).</li>
+          <li>Password tidak pernah dikirim ke layanan eksternal dan tidak disimpan di penyimpanan browser.</li>
+          <li>Password lemah tetap rentan terhadap penebakan. Gunakan password panjang untuk dokumen sensitif.</li>
+          <li>PDF asli yang belum terenkripsi tidak boleh masuk repository publik.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/vendor/pdfjs/pdf.min.js"></script>
+  <script src="../assets/js/crypto.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var catalog = null; // {version, books: []}
+
+    var $ = function (id) { return document.getElementById(id); };
+
+    /* ---------- util unduh file ---------- */
+    function downloadBlob(filename, blobOrBuffer) {
+      var blob = blobOrBuffer instanceof Blob ? blobOrBuffer : new Blob([blobOrBuffer]);
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    }
+
+    /* Antre unduhan berurutan (browser memblokir unduhan beruntun sekaligus) */
+    var dlQueue = Promise.resolve();
+    function queueDownload(filename, blobOrBuffer) {
+      dlQueue = dlQueue.then(function () {
+        downloadBlob(filename, blobOrBuffer);
+        return new Promise(function (r) { setTimeout(r, 400); });
+      });
+      return dlQueue;
+    }
+
+    function downloadJson(filename, obj) {
+      downloadBlob(filename, new Blob([JSON.stringify(obj, null, 2) + '\n'], { type: 'application/json' }));
+    }
+
+    /* ---------- katalog ---------- */
+
+    function renderBookList() {
+      var box = $('book-list');
+      box.innerHTML = '';
+      if (!catalog) return;
+      if (!catalog.books.length) {
+        box.innerHTML = '<p class="mini-note">Katalog kosong — belum ada buku.</p>';
+        return;
+      }
+      catalog.books.forEach(function (b) {
+        var div = document.createElement('div');
+        div.className = 'result-item';
+        var title = document.createElement('strong');
+        title.textContent = b.title || b.id;
+        var meta = document.createElement('div');
+        meta.className = 'mini-note';
+        meta.textContent = (b.id || '') + (b.pages ? ' — ' + b.pages + ' halaman' : '');
+        var del = document.createElement('button');
+        del.className = 'btn btn-danger';
+        del.type = 'button';
+        del.textContent = 'Hapus dari katalog';
+        del.style.marginTop = '0.45rem';
+        del.addEventListener('click', function () {
+          if (!confirm('Hapus "' + (b.title || b.id) + '" dari katalog? File di books/ harus Anda hapus manual lalu push.')) return;
+          catalog.books = catalog.books.filter(function (x) { return x.id !== b.id; });
+          catalog.updatedAt = new Date().toISOString();
+          renderBookList();
+          $('catalog-download').disabled = false;
+        });
+        div.appendChild(title);
+        div.appendChild(meta);
+        div.appendChild(del);
+        box.appendChild(div);
+      });
+    }
+
+    $('catalog-file').addEventListener('change', function () {
+      var f = this.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = JSON.parse(reader.result);
+          if (!data || !Array.isArray(data.books)) throw new Error('Struktur tidak valid');
+          catalog = data;
+          $('catalog-status').textContent = 'Katalog dimuat: ' + catalog.books.length + ' buku.';
+          $('catalog-download').disabled = false;
+          renderBookList();
+        } catch (e) {
+          $('catalog-status').textContent = 'Gagal membaca catalog.json: ' + e.message;
+        }
+      };
+      reader.readAsText(f);
+    });
+
+    $('catalog-new').addEventListener('click', function () {
+      catalog = { version: 1, updatedAt: new Date().toISOString(), books: [] };
+      $('catalog-status').textContent = 'Katalog baru dibuat (0 buku).';
+      $('catalog-download').disabled = false;
+      renderBookList();
+    });
+
+    $('catalog-download').addEventListener('click', function () {
+      if (!catalog) return;
+      catalog.updatedAt = new Date().toISOString();
+      downloadJson('catalog.json', catalog);
+    });
+
+    /* ---------- input buku ---------- */
+
+    var titleInput = $('book-title');
+    var idInput = $('book-id');
+    var idTouched = false;
+
+    idInput.addEventListener('input', function () { idTouched = true; });
+
+    titleInput.addEventListener('input', function () {
+      if (idTouched) return;
+      idInput.value = slugify(titleInput.value);
+    });
+
+    function slugify(s) {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .replace(/[\s_]+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 80);
+    }
+
+    $('toggle-pw').addEventListener('click', function () {
+      var inp = $('book-password');
+      var show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      this.textContent = show ? 'Sembunyikan' : 'Tampilkan';
+    });
+
+    /* ---------- PDF.js untuk cover & jumlah halaman ---------- */
+
+    function pdfWorkerSrc() {
+      return new URL('../assets/vendor/pdfjs/pdf.worker.min.js', document.baseURI).href;
+    }
+
+    function analyzePdf(pdfBytes) {
+      if (!window.pdfjsLib) {
+        return Promise.reject(new Error('PDF.js gagal dimuat. Buka halaman ini lewat server (localhost atau GitHub Pages).'));
+      }
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc();
+      return window.pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise.then(function (doc) {
+        return doc.getPage(1).then(function (page) {
+          var vp = page.getViewport({ scale: 1 });
+          var targetW = 600;
+          var scale = targetW / vp.width;
+          var viewport = page.getViewport({ scale: scale });
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          var ctx = canvas.getContext('2d', { alpha: false });
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          return page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function () {
+            return new Promise(function (resolve) {
+              canvas.toBlob(function (blob) {
+                resolve({ pages: doc.numPages, coverBlob: blob });
+              }, 'image/jpeg', 0.85);
+            });
+          });
+        }).finally(function () {
+          try { doc.destroy(); } catch (e) { /* abaikan */ }
+        });
+      });
+    }
+
+    /* ---------- proses enkripsi ---------- */
+
+    function setProgress(text) {
+      var el = $('book-progress');
+      if (!text) { el.hidden = true; return; }
+      el.hidden = false;
+      el.textContent = text;
+    }
+
+    $('book-process').addEventListener('click', function () {
+      var pdfInput = $('book-pdf');
+      var password = $('book-password').value;
+      var title = titleInput.value.trim();
+      var desc = $('book-desc').value.trim();
+      var id = idInput.value.trim() || slugify(title);
+      var coverInput = $('book-cover');
+      var results = $('book-results');
+      results.innerHTML = '';
+
+      function fail(msg) {
+        var div = document.createElement('div');
+        div.className = 'result-item err';
+        div.textContent = msg;
+        results.appendChild(div);
+      }
+
+      if (!pdfInput.files[0]) return fail('Pilih file PDF terlebih dahulu.');
+      if (!title) return fail('Judul buku wajib diisi.');
+      if (!id || !/^[a-z0-9][a-z0-9-]*$/.test(id)) return fail('ID harus berupa huruf kecil/angka/tanda minus, misal: cerita-piya.');
+      if (!password) return fail('Password enkripsi wajib diisi.');
+      if (catalog && catalog.books.some(function (b) { return b.id === id; })) {
+        return fail('ID "' + id + '" sudah ada di katalog. Ganti ID atau hapus entri lama terlebih dahulu.');
+      }
+
+      this.disabled = true;
+      setProgress('Membaca PDF…');
+
+      var pdfFile = pdfInput.files[0];
+      var coverFile = coverInput.files[0] || null;
+
+      pdfFile.arrayBuffer().then(function (pdfBytes) {
+        setProgress('Menganalisis PDF (jumlah halaman & cover)…');
+        var analyze;
+        if (window.pdfjsLib) {
+          analyze = analyzePdf(new Uint8Array(pdfBytes)).catch(function (e) {
+            // PDF.js gagal (mis. dibuka via file://) — lanjut tanpa cover otomatis
+            return { pages: null, coverBlob: null, warn: e.message };
+          });
+        } else {
+          analyze = Promise.resolve({ pages: null, coverBlob: null, warn: 'PDF.js tidak tersedia.' });
+        }
+        return analyze.then(function (info) {
+          setProgress('Mengenkripsi PDF (AES-256-GCM)…');
+          return PiyaCrypto.encryptPdf(pdfBytes, password, {
+            name: pdfFile.name,
+            mime: 'application/pdf',
+            ext: 'pdf'
+          }).then(function (encBuf) {
+            setProgress('Menyiapkan unduhan…');
+
+            // 1. file terenkripsi
+            var encName = id + '.piyapdf';
+            queueDownload(encName, encBuf);
+            var r1 = document.createElement('div');
+            r1.className = 'result-item ok';
+            r1.innerHTML = '<strong>' + encName + '</strong> — simpan ke folder <code>books/</code>';
+            results.appendChild(r1);
+
+            // 2. cover
+            var coverPromise;
+            var coverName, coverPath;
+            if (coverFile) {
+              coverName = id + '.' + (coverFile.name.split('.').pop().toLowerCase() || 'jpg');
+              coverPath = 'books/covers/' + coverName;
+              coverPromise = Promise.resolve(coverFile).then(function (cf) {
+                queueDownload(coverName, cf);
+              });
+            } else if (info.coverBlob) {
+              coverName = id + '.jpg';
+              coverPath = 'books/covers/' + coverName;
+              coverPromise = Promise.resolve().then(function () {
+                queueDownload(coverName, info.coverBlob);
+              });
+            } else {
+              coverPromise = Promise.resolve();
+            }
+
+            return coverPromise.then(function () {
+              if (coverPath) {
+                var r2 = document.createElement('div');
+                r2.className = 'result-item ok';
+                r2.innerHTML = '<strong>' + coverName + '</strong> — simpan ke folder <code>books/covers/</code>';
+                results.appendChild(r2);
+              } else if (info.warn) {
+                var r2w = document.createElement('div');
+                r2w.className = 'result-item err';
+                r2w.textContent = 'Cover otomatis tidak bisa dibuat (' + info.warn + '). Gunakan cover khusus, atau jalankan halaman ini melalui localhost/GitHub Pages.';
+                results.appendChild(r2w);
+              }
+
+              // 3. katalog
+              if (!catalog) {
+                catalog = { version: 1, updatedAt: new Date().toISOString(), books: [] };
+                $('catalog-status').textContent = 'Katalog baru dibuat otomatis.';
+              }
+              catalog.books.push({
+                id: id,
+                title: title,
+                description: desc || '',
+                pages: info.pages || null,
+                cover: coverPath || null,
+                file: 'books/' + encName,
+                format: 'piyapdf/1',
+                addedAt: new Date().toISOString()
+              });
+              catalog.updatedAt = new Date().toISOString();
+              renderBookList();
+
+              queueDownload('catalog.json', new Blob([JSON.stringify(catalog, null, 2) + '\n'], { type: 'application/json' }));
+              var r3 = document.createElement('div');
+              r3.className = 'result-item ok';
+              r3.innerHTML = '<strong>catalog.json</strong> — simpan ke folder <code>data/</code> (timpa yang lama)';
+              results.appendChild(r3);
+
+              var r4 = document.createElement('div');
+              r4.className = 'result-item';
+              r4.textContent = 'Selesai! Salin file-file di atas ke repository seperti petunjuk pada bagian 3, lalu git commit & push.';
+              results.appendChild(r4);
+              setProgress('');
+            });
+          });
+        });
+      }).catch(function (e) {
+        setProgress('');
+        fail('Gagal memproses: ' + (e && e.message ? e.message : e));
+      }).then(function () {
+        $('book-process').disabled = false;
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

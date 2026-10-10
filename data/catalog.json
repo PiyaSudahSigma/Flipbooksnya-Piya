@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-10T09:37:43.025Z",
+  "books": [
+    {
+      "id": "123",
+      "title": "123",
+      "description": "123",
+      "pages": 10,
+      "cover": "books/covers/123.jpeg",
+      "file": "books/123.piyapdf",
+      "format": "piyapdf/1",
+      "addedAt": "2026-10-10T09:37:43.025Z"
+    }
+  ]
+}
